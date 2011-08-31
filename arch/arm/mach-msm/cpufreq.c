@@ -39,6 +39,7 @@ struct cpufreq_work_struct {
 };
 
 static DEFINE_PER_CPU(struct cpufreq_work_struct, cpufreq_work);
+static struct workqueue_struct *msm_cpufreq_wq;
 #endif
 
 struct cpufreq_suspend_t {
@@ -138,8 +139,8 @@ static int msm_cpufreq_target(struct cpufreq_policy *policy,
 		goto done;
 	} else {
 		cancel_work_sync(&cpu_work->work);
-		init_completion(&cpu_work->complete);
-		schedule_work_on(policy->cpu, &cpu_work->work);
+		INIT_COMPLETION(cpu_work->complete);
+		queue_work_on(policy->cpu, msm_cpufreq_wq, &cpu_work->work);
 		wait_for_completion(&cpu_work->complete);
 	}
 
@@ -163,7 +164,7 @@ static int msm_cpufreq_verify(struct cpufreq_policy *policy)
 
 static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
 {
-#ifdef CONFIG_ARCH_MSM8X60
+#if defined(CONFIG_ARCH_MSM8X60) || defined(CONFIG_ARCH_MSM_ARM11)
 	int cur_freq;
 	int index;
 #endif
@@ -190,10 +191,14 @@ static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
 #endif
 #endif
 
-#ifndef CONFIG_ARCH_MSM8X60
+#if !defined(CONFIG_ARCH_MSM8X60) && !defined(CONFIG_ARCH_MSM_ARM11)
 	policy->cur = acpuclk_get_rate();
 #else
+#ifdef CONFIG_ARCH_MSM8X60
 	cur_freq = acpuclk_get_rate(policy->cpu);
+#else
+	cur_freq = acpuclk_get_rate();
+#endif
 	if (cpufreq_frequency_table_target(policy, table, cur_freq,
 				CPUFREQ_RELATION_H, &index)) {
 		pr_info("cpufreq: cpu%d at invalid freq: %d\n",
@@ -203,8 +208,12 @@ static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
 
 	if (cur_freq != table[index].frequency) {
 		int ret = 0;
+#ifdef CONFIG_ARCH_MSM8X60
 		ret = acpuclk_set_rate(policy->cpu, table[index].frequency,
 				SETRATE_CPUFREQ);
+#else
+		ret = acpuclk_set_rate(table[index].frequency*1000,SETRATE_CPUFREQ);
+#endif
 		if (ret)
 			return ret;
 		pr_info("cpufreq: cpu%d init at %d switching to %d\n",
@@ -220,6 +229,7 @@ static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
 #ifdef CONFIG_SMP
 	cpu_work = &per_cpu(cpufreq_work, policy->cpu);
 	INIT_WORK(&cpu_work->work, set_cpu_work);
+	init_completion(&cpu_work->complete);
 #endif
 
 	return 0;
@@ -291,6 +301,10 @@ static int __init msm_cpufreq_register(void)
 		mutex_init(&(per_cpu(cpufreq_suspend, cpu).suspend_mutex));
 		per_cpu(cpufreq_suspend, cpu).device_suspended = 0;
 	}
+
+#ifdef CONFIG_SMP
+	msm_cpufreq_wq = create_workqueue("msm-cpufreq");
+#endif
 
 	register_pm_notifier(&msm_cpufreq_pm_notifier);
 	return cpufreq_register_driver(&msm_cpufreq_driver);
