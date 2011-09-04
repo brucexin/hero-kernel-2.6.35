@@ -298,6 +298,10 @@ static int cpufreq_stat_notifier_trans(struct notifier_block *nb,
 	old_index = stat->last_index;
 	new_index = freq_table_get_index(stat, freq->new);
 
+	/* We can't do stat->time_in_state[-1]= .. */
+	if (old_index == -1 || new_index == -1)
+		return 0;
+
 	cpufreq_stats_update(freq->cpu);
 
 	if (old_index == new_index)
@@ -305,12 +309,10 @@ static int cpufreq_stat_notifier_trans(struct notifier_block *nb,
 
 	spin_lock(&cpufreq_stats_lock);
 	stat->last_index = new_index;
-	if (old_index >= 0 && new_index >= 0) {
 #ifdef CONFIG_CPU_FREQ_STAT_DETAILS
-		stat->trans_table[old_index * stat->max_state + new_index]++;
+	stat->trans_table[old_index * stat->max_state + new_index]++;
 #endif
-		stat->total_trans++;
-	}
+	stat->total_trans++;
 	spin_unlock(&cpufreq_stats_lock);
 	return 0;
 }
