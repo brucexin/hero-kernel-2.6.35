@@ -75,8 +75,10 @@ static int proc_comm_wait_for(void __iomem *addr, unsigned value)
 	unsigned long long timeout = TIMEOUT;
 #endif
 
-	for (;;) {
-		if (readl(addr) == value)
+	while (1) {
+		/* Barrier here prevents excessive spinning */
+		mb();
+		if (readl_relaxed(addr) == value)
 			return 0;
 
 		if (msm_check_for_modem_crash)
