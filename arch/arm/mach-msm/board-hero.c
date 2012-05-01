@@ -1415,7 +1415,7 @@ static void __init hero_fixup(struct machine_desc *desc, struct tag *tags,
 static void __init hero_map_io(void)
 {
 	msm_map_common_io();
-	msm_clock_init();
+	msm_clock_init(msm_clocks_7x01a, msm_num_clocks_7x01a);
 }
 
 MACHINE_START(HERO, "hero")

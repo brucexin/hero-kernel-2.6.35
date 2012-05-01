@@ -492,9 +492,10 @@ static void __init set_clock_ops(struct clk *clk)
 #endif
 }
 
-void __init msm_clock_init(void)
+void __init msm_clock_init(struct clk *clock_tbl, unsigned num_clocks)
 {
 	struct clk *clk;
+	unsigned n;
 
 #if defined(CONFIG_ARCH_MSM7X30)
 	clk_7x30_init();
@@ -502,7 +503,8 @@ void __init msm_clock_init(void)
 	spin_lock_init(&clocks_lock);
 	spin_lock_init(&ebi1_rate_lock);
 	mutex_lock(&clocks_mutex);
-	for (clk = msm_clocks; clk && clk->name; clk++) {
+	for (n = 0; n < num_clocks; n++) {	
+		clk = &clock_tbl[n];
 		set_clock_ops(clk);
 		if (clk->flags & CLKFLAG_DEFER) {
 			init_timer(&clk->defer_clk_timer);
