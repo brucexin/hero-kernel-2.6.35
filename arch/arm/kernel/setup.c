@@ -91,11 +91,6 @@ EXPORT_SYMBOL(system_serial_high);
 unsigned int elf_hwcap;
 EXPORT_SYMBOL(elf_hwcap);
 
-/* Start, Riemer: 24-06-2012: always get access to cpu_tlb */
-#ifndef CONFIG_CC_OPTIMIZE_FOR_SIZE
-#define MULTI_TLB
-#endif
-/* End, Riemer: 24-06-2012 */
 
 #ifdef MULTI_CPU
 struct processor processor;
