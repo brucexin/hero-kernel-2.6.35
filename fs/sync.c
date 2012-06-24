@@ -127,7 +127,7 @@ void emergency_sync(void)
 {
 	struct work_struct *work;
 	
-	return 0;
+	return;
 
 	work = kmalloc(sizeof(*work), GFP_ATOMIC);
 	if (work) {
