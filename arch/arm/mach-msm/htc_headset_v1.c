@@ -248,10 +248,11 @@ void disable_h2w_irq(void)
 
 int h2w_enable_irq(void *argu)
 {
+	int *enable = (int *) argu;
+
 	if (FS_USB_ENABLE)
 		return 1;
 
-	int *enable = (int *) argu;
 	if (*enable)
 		enable_h2w_irq();
 	else
@@ -409,6 +410,8 @@ ack_resend:
 		udelay(hi->speed);
 		return 0;
 	}
+
+	return -1;
 }
 
 static unsigned char h2w_readc(void)

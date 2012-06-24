@@ -98,7 +98,7 @@ static uint32_t hero_sdslot_switchvdd(struct device *dev, unsigned int vdd)
 	sdslot_vdd = vdd;
 
 	if (vdd == 0) {
-#if DEBUG_SDSLOT_VDD
+#ifdef DEBUG_SDSLOT_VDD
 		printk(KERN_DEBUG "%s: Disabling SD slot power\n", __func__);
 #endif
 		config_gpio_table(sdcard_off_gpio_table,
@@ -124,7 +124,7 @@ static uint32_t hero_sdslot_switchvdd(struct device *dev, unsigned int vdd)
 	for (i = 0; i < ARRAY_SIZE(mmc_vdd_table); i++) {
 		if (mmc_vdd_table[i].mask != (1 << vdd))
 			continue;
-#if DEBUG_SDSLOT_VDD
+#ifdef DEBUG_SDSLOT_VDD
 		printk(KERN_DEBUG "%s: Setting level to %u\n",
 			__func__, mmc_vdd_table[i].level);
 #endif

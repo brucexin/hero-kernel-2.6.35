@@ -84,15 +84,15 @@ static struct platform_device hero_wifi = {
 static int __init hero_wifi_init(void)
 {
 	int ret;
-
 	printk("%s: start\n", __func__);
 
 #ifdef CONFIG_WIFI_MEM_PREALLOC
-	int rc = hero_init_wifi_mem();
-	if (rc) {
+	ret = hero_init_wifi_mem();
+	if (ret) {
 		printk(KERN_CRIT "%s: WiFi memory init failure (%d)\n",
-		       __func__, rc);
+		       __func__, ret);
 	}
+	return ret;
 #endif
 
 	ret = platform_device_register(&hero_wifi);

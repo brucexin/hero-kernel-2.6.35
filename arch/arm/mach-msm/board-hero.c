@@ -1011,6 +1011,7 @@ static int set_h2w_path(const char *val, struct kernel_param *kp)
 	return ret;
 }
 
+#if 0
 static void hero_h2w_power(int on)
 {
 	if (on)
@@ -1018,6 +1019,7 @@ static void hero_h2w_power(int on)
 	else
 		gpio_set_value(HERO_GPIO_EXT_3V_EN, 0);
 }
+#endif
 
 module_param_call(h2w_path, set_h2w_path, param_get_int,
 		&hero_h2w_path, S_IWUSR | S_IRUGO);
