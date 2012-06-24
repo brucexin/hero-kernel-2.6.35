@@ -91,8 +91,8 @@ static int __init hero_wifi_init(void)
 	if (ret) {
 		printk(KERN_CRIT "%s: WiFi memory init failure (%d)\n",
 		       __func__, ret);
+		return ret;
 	}
-	return ret;
 #endif
 
 	ret = platform_device_register(&hero_wifi);
