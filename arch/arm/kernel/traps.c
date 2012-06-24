@@ -666,6 +666,24 @@ void __bad_xchg(volatile void *ptr, int size)
 }
 EXPORT_SYMBOL(__bad_xchg);
 
+/* Start, Riemer: 24-06-2012: to get the kernel compiling for -o2 for less cooperating toolchains */
+#ifndef CONFIG_CC_OPTIMIZE_FOR_SIZE
+void __bad_cmpxchg(volatile void *ptr, int size)
+{
+	printk("cmpxchg: bad data size: pc 0x%p, ptr 0x%p, size %d\n",
+		__builtin_return_address(0), ptr, size);
+	BUG();
+}
+EXPORT_SYMBOL(__bad_cmpxchg);
+
+void __bad_size(void)
+{
+	printk("bad_size: bad data size: pc 0x%p\n", __builtin_return_address(0));
+	BUG();
+}
+#endif
+/* End, Riemer: 24-06-2012 */
+
 /*
  * A data abort trap was taken, but we did not handle the instruction.
  * Try to abort the user program, or panic if it was the kernel.
